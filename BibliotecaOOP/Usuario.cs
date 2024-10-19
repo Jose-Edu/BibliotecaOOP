@@ -1,14 +1,14 @@
-public class Usuario : IPesquisavel
+public class Usuario
 {
-    public string Nome { get; private set; }
-    public int Id { get; private set; }
-    public string Contato { get; private set; }
-    public string Endereco { get; private set; }
+    public string Nome { get; set; }
+    public int Id { get; set; }
+    public string Contato { get; set; }
+    public string Endereco { get; set; }
 
-    public Usuario(string Nome, int Id, string Contato, string Endereco)
+    public Usuario(string Nome, string Contato, string Endereco, int Id = -1)
     {
         this.Nome = Nome;
-        this.Id = Id;
+        this.Id = Id == -1 ? DataBase.SetUserId() : Id;
         this.Contato = Contato;
         this.Endereco = Endereco;
     }
@@ -16,6 +16,11 @@ public class Usuario : IPesquisavel
     public void ExibirInfo() 
     {
         Console.WriteLine($"| Nome: {Nome}, Id: {Id}, Contato: {Contato}, Endereço: {Endereco}. |");
+    }
+
+    public void ExibirHistórico()
+    {
+
     }
 
 }

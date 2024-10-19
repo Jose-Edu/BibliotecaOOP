@@ -1,5 +1,5 @@
 public interface IEmprestavel
 {
-    void Emprestimo(int dias);
-    void Devolucao();
+    void Emprestimo(Usuario usuario, int dias);
+    void Devolucao(Usuario usuario);
 }

@@ -1,4 +1,6 @@
 public interface IPesquisavel
 {
-    void ExibirInfo();
+    void PesquisarPorTitulo(string titulo);
+    void PesquisarPorAutor(string autor);
+    void PesquisarPorGenero(string genero);
 }

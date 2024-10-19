@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.SQLite;
 
 public static class DataBase
@@ -10,19 +11,62 @@ public static class DataBase
         return connection;
     }
 
-    private static void Cadastrar()
+    public static void Query(string query)
     {
-        
+
+        using(var db = DBConnect().CreateCommand())
+        {
+            db.CommandText = query;
+            db.ExecuteNonQuery();
+        };
+    
     }
 
-    private static void Consultar()
+    public static DataTable Read(string table, string where)
     {
+        var dt = new DataTable();
 
+        using(var db = DBConnect().CreateCommand())
+        {
+            db.CommandText = $"SELECT * FROM {table} WHERE {where}";
+            var dataAdapter = new SQLiteDataAdapter(db.CommandText, DBConnect());
+            dataAdapter.Fill(dt);
+            return dt;
+        }
     }
 
-    private static void Atualizar()
+    public static DataTable Read(string table)
     {
+        var dt = new DataTable();
 
+        using(var db = DBConnect().CreateCommand())
+        {
+            db.CommandText = $"SELECT * FROM {table}";
+            var dataAdapter = new SQLiteDataAdapter(db.CommandText, DBConnect());
+            dataAdapter.Fill(dt);
+            return dt;
+        }
+    }
+
+    public static void Delete(string table, string where)
+    {
+        using(var db = DBConnect().CreateCommand())
+        {
+            db.CommandText = $"DELETE FROM {table} WHERE {where}";
+            db.ExecuteNonQuery();
+        };
+    }
+
+    public static int SetUserId()
+    {
+        var dt = new DataTable();
+        using(var db = DBConnect().CreateCommand())
+        {
+            db.CommandText = "SELECT id FROM usuarios ORDER BY id DESC; LIMIT 1";
+            var dataAdapter = new SQLiteDataAdapter(db.CommandText, DBConnect());
+            dataAdapter.Fill(dt);
+            return ((int) dt.Rows[0].Field<Int64>("id")) + 1;
+        }
     }
 
 }
