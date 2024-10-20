@@ -67,7 +67,21 @@ public class Biblioteca : IPesquisavel
 
     public void ListarEmprestimos(bool incluirFechados = false)
     {
+        DataTable emprestimos = incluirFechados ? DataBase.Read("emprestimos") : DataBase.Read("emprestimos", "fechamento='Pendente'");
 
+        Menu.Title("Emprestimos encontrados");
+        foreach(DataRow row in emprestimos.Rows)
+        {
+            Livro livro = PesquisarPorIsbn(Validar.String(row.Field<string>("book_isbn")));
+            livro = Livros[Livros.IndexOf(livro)];
+            Usuario usuario = PesquisarUsuarioPorID((int) row.Field<Int64>("user_id"), false);
+            usuario = Usuarios[Usuarios.IndexOf(usuario)];
+
+            Console.WriteLine($"| Livro: {livro.Titulo}({livro.Isbn}) / Usuário: {usuario.Nome}({usuario.Id}) / Data Limite: {row.Field<string>("limite")} / Fechamento: {row.Field<string>("fechamento")} |");
+
+        }
+        Console.ReadKey();
+        Console.WriteLine();
     }
 
     public void CadastrarLivro(Livro livro)
@@ -90,15 +104,15 @@ public class Biblioteca : IPesquisavel
         Console.WriteLine();
     }
 
-    public void EditarLivro(Livro livro, string?[] campos)
+    public void EditarLivro(Livro livro, string[] campos)
     {
 
-        livro.Titulo = campos[0] ?? livro.Titulo;
-        livro.Autor = campos[1] ?? livro.Autor;
-        livro.Genero = campos[2] ?? livro.Genero;
-        livro.Quantidade = campos[3] == null ? livro.Quantidade : Convert.ToInt32(campos[4]);
+        livro.Titulo = campos[0] != "" ? campos[0] : livro.Titulo;
+        livro.Autor = campos[1] != "" ? campos[1] : livro.Autor;
+        livro.Genero = campos[2] != "" ? campos[2] : livro.Genero;
+        livro.Quantidade = campos[3] != "" ? Convert.ToInt32(campos[3]): livro.Quantidade;
 
-        DataBase.Query($"UPDATE usuarios SET titulo='{livro.Titulo}', autor='{livro.Autor}', genero='{livro.Genero}', quantidade={livro.Quantidade} WHERE isbn='{livro.Isbn}'");
+        DataBase.Query($"UPDATE livros SET titulo='{livro.Titulo}', autor='{livro.Autor}', genero='{livro.Genero}', quantidade={livro.Quantidade} WHERE isbn='{livro.Isbn}' LIMIT 1");
 
         Console.WriteLine("Livro atualizado com sucesso!");
         livro.ExibirInfo();
@@ -106,29 +120,39 @@ public class Biblioteca : IPesquisavel
         
     }
 
-    public void EditarUsuario(Usuario usuario, string?[] campos)
+    public void EditarUsuario(Usuario usuario, string[] campos)
     {
 
-        usuario.Nome = campos[0] ?? usuario.Nome;
-        usuario.Contato = campos[1] ?? usuario.Contato;
-        usuario.Endereco = campos[2] ?? usuario.Contato;
+        usuario.Nome = campos[0] != "" ? campos[0] : usuario.Nome;
+        usuario.Contato = campos[1] != "" ? campos[1] : usuario.Contato;
+        usuario.Endereco = campos[2] != "" ? campos[2] : usuario.Contato;
 
-        DataBase.Query($"UPDATE usuarios SET nome = '{usuario.Nome}', contato='{usuario.Contato}',endereco='{usuario.Endereco}', WHERE id={usuario.Id}");
+        DataBase.Query($"UPDATE usuarios SET nome = '{usuario.Nome}', contato='{usuario.Contato}', endereco='{usuario.Endereco}' WHERE id={usuario.Id} LIMIT 1");
 
-        Console.WriteLine("Livro atualizado com sucesso!");
+        Console.WriteLine("Usuário atualizado com sucesso!");
         usuario.ExibirInfo();
         Console.ReadKey();
 
     }
 
-    public void EmprestarLivro(string codigoLivro, string idUsuario)
+    public void EmprestarLivro(string codigoLivro, int idUsuario, int dias)
     {
+        Livro livro = PesquisarPorIsbn(codigoLivro);
+        livro = Livros[Livros.IndexOf(livro)];
+        Usuario usuario = PesquisarUsuarioPorID(idUsuario, false);
+        usuario = Usuarios[Usuarios.IndexOf(usuario)];
 
+        livro.Emprestimo(usuario, dias);
     }
 
-    public void DevolverLivro(string codigoLivro)
+    public void DevolverLivro(string codigoLivro, int idUsuario)
     {
+        Livro livro = PesquisarPorIsbn(codigoLivro);
+        livro = Livros[Livros.IndexOf(livro)];
+        Usuario usuario = PesquisarUsuarioPorID(idUsuario, false);
+        usuario = Usuarios[Usuarios.IndexOf(usuario)];
 
+        livro.Devolucao(usuario);
     }
 
     public void PesquisarPorTitulo(string titulo)
@@ -155,19 +179,57 @@ public class Biblioteca : IPesquisavel
         return livros[0];
     }
 
-    public int PesquisarUsuarioPorID(int id, bool mostrar=true)
+    public Usuario PesquisarUsuarioPorID(int id, bool mostrar=true)
     {
         var usuarios = Usuarios.FindAll(usuario => usuario.Id == id);
         if(mostrar){ListarUsuarios(usuarios);};
-        return usuarios[0].Id;
+        return usuarios[0];
     }
 
-    public string? PesquisarUsuarioPorNome(string nome, bool mostrar=true)
+    public Usuario? PesquisarUsuarioPorNome(string nome, bool mostrar=true)
     {
         var usuarios = Usuarios.FindAll(usuario => usuario.Nome == nome);
         if(mostrar){ListarUsuarios(usuarios);};
-        return usuarios.Count == 1 ? usuarios[0].Nome : null;
+        return usuarios.Count == 1 ? usuarios[0] : null;
     }
 
+    public void PesquisarEmprestimoPorUsuario(int id, bool incluirFechados=false)
+    {
+        Usuario usuario = PesquisarUsuarioPorID(id, false);
+        usuario = Usuarios[Usuarios.IndexOf(usuario)];
 
+        DataTable emprestimos = incluirFechados ? DataBase.Read("emprestimos", $"user_id={usuario.Id}") : DataBase.Read("emprestimos", $"fechamento='Pendente' AND user_id={usuario.Id}");
+
+        Menu.Title($"Emprestimos encontrados para o usuario {usuario.Nome}({usuario.Id})");
+        foreach(DataRow row in emprestimos.Rows)
+        {
+            Livro livro = PesquisarPorIsbn(Validar.String(row.Field<string>("book_isbn")));
+            livro = Livros[Livros.IndexOf(livro)];
+
+            Console.WriteLine($"| Livro: {livro.Titulo}({livro.Isbn}) / Data Limite: {row.Field<string>("limite")} / Fechamento: {row.Field<string>("fechamento")} |");
+
+        }
+        Console.ReadKey();
+        Console.WriteLine();
+    }
+
+    public void PesquisarEmprestimoPorLivro(string isbn, bool incluirFechados=false)
+    {
+        Livro livro = PesquisarPorIsbn(isbn);
+        livro = Livros[Livros.IndexOf(livro)];
+        
+        DataTable emprestimos = incluirFechados ? DataBase.Read("emprestimos", $"book_isbn={livro.Isbn}") : DataBase.Read("emprestimos", $"fechamento='Pendente' AND book_isbn={livro.Isbn}");
+
+        Menu.Title($"Emprestimos encontrados para o livro {livro.Titulo}({livro.Isbn})");
+        foreach(DataRow row in emprestimos.Rows)
+        {
+            Usuario usuario = PesquisarUsuarioPorID((int) row.Field<Int64>("user_id"), false);
+            usuario = Usuarios[Usuarios.IndexOf(usuario)];
+
+            Console.WriteLine($"| Usuário: {usuario.Nome}({usuario.Id}) / Data Limite: {row.Field<string>("limite")} / Fechamento: {row.Field<string>("fechamento")} |");
+
+        }
+        Console.ReadKey();
+        Console.WriteLine();
+    }
 }

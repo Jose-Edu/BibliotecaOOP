@@ -1,6 +1,9 @@
 ﻿var biblioteca = new Biblioteca();
 var menu = new Menu();
 
+Console.WriteLine(Validar.ReadLine());
+Console.ReadKey();
+
 while (true)
 {
     menu.MainMenu();
@@ -14,9 +17,7 @@ while (true)
             switch(menu.op)
             {
                 case "1":
-                    Console.Clear();
-                    Console.WriteLine("Cadastrar livro:");
-                    Console.WriteLine();
+                    Menu.Title("Cadastrar novo livro");
                     biblioteca.CadastrarLivro(new Livro(
                         Validar.ReadLine("Digite o título do livro: "), 
                         Validar.ReadLine("Digite o código ISBN do livro: "), 
@@ -47,11 +48,14 @@ while (true)
                     break;
 
                 case "3":
-                    var livro = biblioteca.Livros[biblioteca.PesquisarPorIsbn(Validar.ReadLine("Digite o ISBN do livro: "))];
-                    biblioteca.EditarUsuario(usuario, [
-                        Validar.ReadLineNull($"Digite o novo nome do usuário ou enter para manter {usuario.Nome}: "),
-                        Validar.ReadLineNull($"Digite o novo contato do usuário ou enter para manter {usuario.Contato}: "),
-                        Validar.ReadLineNull($"Digite o novo endereco do usuário ou enter para manter {usuario.Endereco}: ")
+                    Menu.Title("Editar livro");
+                    Livro livro = biblioteca.PesquisarPorIsbn(Validar.ReadLine("Digite o ISBN do livro: "));
+                    livro = biblioteca.Livros[biblioteca.Livros.IndexOf(livro)];
+                    biblioteca.EditarLivro(livro, [
+                        Validar.ReadLine($"Digite o novo titulo do livro ou enter para manter {livro.Titulo}: "),
+                        Validar.ReadLine($"Digite o novo autor do livro ou enter para manter {livro.Autor}: "),
+                        Validar.ReadLine($"Digite o novo gênero do livro ou enter para manter {livro.Genero}: "),
+                        Validar.ReadLine($"Digite a nova quantidade em estoque ou enter para manter {livro.Quantidade}: ")
                     ]);
                     break;
 
@@ -72,9 +76,7 @@ while (true)
             switch(menu.op)
             {
                 case "1":
-                    Console.Clear();
-                    Console.WriteLine("Cadastrar Usuário:");
-                    Console.WriteLine();
+                    Menu.Title("Cadastrar usuário");
                     biblioteca.CadastrarUsuario(new Usuario(
                         Validar.ReadLine("Digite o nome do usuário: "), 
                         Validar.ReadLine("Digite o contato do usuário (email ou telefone): "), 
@@ -101,12 +103,13 @@ while (true)
                     break;
 
                 case "3":
-                    int id = biblioteca.PesquisarUsuarioPorID(Validar.ReadLineInt("Digite o ID do usuário: "), false);
-                    var usuario = biblioteca.Usuarios[];
-                    biblioteca.EditarUsuario(usuario, [
-                        Validar.ReadLineNull($"Digite o novo nome do usuário ou enter para manter {usuario.Nome}: "),
-                        Validar.ReadLineNull($"Digite o novo contato do usuário ou enter para manter {usuario.Contato}: "),
-                        Validar.ReadLineNull($"Digite o novo endereco do usuário ou enter para manter {usuario.Endereco}: ")
+                    Menu.Title("Editar usuário");
+                    Usuario user = biblioteca.PesquisarUsuarioPorID(Validar.ReadLineInt("Digite o ID do usuário: "), false);
+                    user = biblioteca.Usuarios[biblioteca.Usuarios.IndexOf(user)];
+                    biblioteca.EditarUsuario(user, [
+                        Validar.ReadLine($"Digite o novo nome do usuário ou enter para manter {user.Nome}: "),
+                        Validar.ReadLine($"Digite o novo contato do usuário ou enter para manter {user.Contato}: "),
+                        Validar.ReadLine($"Digite o novo endereco do usuário ou enter para manter {user.Endereco}: ")
                     ]);
                     break;
 
@@ -121,20 +124,46 @@ while (true)
             break;
 
         case "3":
-            menu.op = Menu.MenuOps("Empréstimo", ["Registrar empréstimo", "Registrar devolução", "Listar empréstimos"]);
+            menu.op = Menu.MenuOps("Empréstimo", ["Registrar empréstimo", "Registrar devolução", "Listar empréstimos", "Listar empréstimos por usuário", "Listar empréstimos por livro"]);
 
             switch(menu.op)
             {
                 case "1":
-                    //biblioteca.EmprestarLivro();
+                    Menu.Title("Emprestar livro");
+                    biblioteca.EmprestarLivro(
+                        Validar.ReadLine("Digite o código ISBN do livro: "),
+                        Validar.ReadLineInt("Digite o id do usuário para emprestar: "),
+                        Validar.ReadLineInt("Digite o número de dias de emprestimo: ")
+                    );
                     break;
                 
                 case "2":
-                    //biblioteca.DevolverLivro();
+                    Menu.Title("Devolver livro");
+                    biblioteca.DevolverLivro(
+                        Validar.ReadLine("Digite o código ISBN do livro: "),
+                        Validar.ReadLineInt("Digite o ID do usuário: ")
+                    );
                     break;
 
                 case "3":
-                    biblioteca.ListarEmprestimos();
+                    Menu.Title("Listar empréstimos");
+                    biblioteca.ListarEmprestimos(Validar.ReadLineBool("Mostrar empréstimos fechados? [s/n]: "));
+                    break;
+
+                case "4":
+                    Menu.Title("Listar emprestimos por usuário");
+                    biblioteca.PesquisarEmprestimoPorUsuario(
+                        Validar.ReadLineInt("Digite o ID do usuário: "),
+                        Validar.ReadLineBool("Mostrar empréstimos fechados? [s/n]: ")
+                    );
+                    break;
+                
+                case "5":
+                    Menu.Title("Listar emprestimos por livro");
+                    biblioteca.PesquisarEmprestimoPorLivro(
+                        Validar.ReadLine("Digite o código ISBN do livro: "),
+                        Validar.ReadLineBool("Mostrar empréstimos fechados? [s/n]: ")
+                    );
                     break;
 
                 default:

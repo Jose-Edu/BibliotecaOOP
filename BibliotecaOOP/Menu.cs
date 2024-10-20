@@ -29,4 +29,11 @@ public class Menu
 
     }
 
+    public static void Title(string title)
+    {
+        Console.Clear();
+        Console.WriteLine(title+":");
+        Console.WriteLine();
+    }
+
 }
