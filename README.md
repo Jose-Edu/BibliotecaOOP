@@ -2,9 +2,10 @@
 
 Sistema de gerenciamento de biblioteca funcional escrito em C#.
 
-## Link do vídeo
+## Links
 
-(Video explicativo) https://www.youtube.com/watch?v=fp4K_xdX3o4
+* (Video explicativo) https://www.youtube.com/watch?v=fp4K_xdX3o4
+* (Texto acadêmico) https://drive.google.com/file/d/1uwwHBN7LAG_9kI0KYuU68zQlgZpP1WJB/view?usp=sharing
 
 ## Como usar esse programa
 
