@@ -78,7 +78,6 @@ public class Biblioteca : IPesquisavel
             usuario = Usuarios[Usuarios.IndexOf(usuario)];
 
             Console.WriteLine($"| Livro: {livro.Titulo}({livro.Isbn}) / Usuário: {usuario.Nome}({usuario.Id}) / Data Limite: {row.Field<string>("limite")} / Fechamento: {row.Field<string>("fechamento")} |");
-
         }
         Console.ReadKey();
         Console.WriteLine();
@@ -125,7 +124,7 @@ public class Biblioteca : IPesquisavel
 
         usuario.Nome = campos[0] != "" ? campos[0] : usuario.Nome;
         usuario.Contato = campos[1] != "" ? campos[1] : usuario.Contato;
-        usuario.Endereco = campos[2] != "" ? campos[2] : usuario.Contato;
+        usuario.Endereco = campos[2] != "" ? campos[2] : usuario.Endereco;
 
         DataBase.Query($"UPDATE usuarios SET nome = '{usuario.Nome}', contato='{usuario.Contato}', endereco='{usuario.Endereco}' WHERE id={usuario.Id} LIMIT 1");
 

@@ -1,9 +1,6 @@
 ﻿var biblioteca = new Biblioteca();
 var menu = new Menu();
 
-Console.WriteLine(Validar.ReadLine());
-Console.ReadKey();
-
 while (true)
 {
     menu.MainMenu();
